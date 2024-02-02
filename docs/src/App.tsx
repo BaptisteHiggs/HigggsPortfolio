@@ -1,6 +1,4 @@
-import logo from "./logo.svg";
 import "./App.css";
-import { Button } from "ui-neumorphism";
 import "ui-neumorphism/dist/index.css";
 import { Page } from "./page/page";
 import { overrideThemeVariables } from "ui-neumorphism";
