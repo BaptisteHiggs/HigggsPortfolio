@@ -139,14 +139,16 @@ const ParticlesBackground = () => {
 
 export const Page = () => {
   const links: TextLinkCombo[] = [
-    { text: "LinkedIn", link: "https://www.google.com/" },
-    { text: "GitHub", link: "https://www.google.com/" },
-    { text: "CAADRIA Conference Paper", link: "https://www.google.com/" },
+    { text: "LinkedIn", link: "https://linkedin.com/in/baptistehiggs/" },
+    { text: "GitHub", link: "https://github.com/BaptisteHiggs" },
+    {
+      text: "CAADRIA Conference Paper",
+      link: "http://dx.doi.org/10.52842/conf.caadria.2020.2.697",
+    },
     {
       text: "Journal of Architectural Science Paper",
-      link: "https://www.google.com/",
+      link: "https://doi.org/10.1080/00038628.2020.1748869",
     },
-    { text: "Download CV", link: "https://www.google.com/" },
   ];
 
   return (
@@ -178,6 +180,10 @@ export const Page = () => {
               <br />
             </>
           ))}
+          {/*@ts-ignore */}
+          <Button color={"#333"} onClick={() => downloadResume()}>
+            Download CV
+          </Button>
         </div>
       </div>
 
@@ -191,3 +197,13 @@ export const Page = () => {
 function goToUrl(url: string) {
   window.location.href = url;
 }
+
+const downloadResume = () => {
+  const pdfUrl = "/BaptisteHiggsResume.pdf";
+  const link = document.createElement("a");
+  link.href = pdfUrl;
+  link.download = "BaptisteHiggsResume.pdf"; // specify the filename
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
