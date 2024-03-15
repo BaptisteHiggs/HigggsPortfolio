@@ -2,6 +2,8 @@ import "./App.css";
 import "ui-neumorphism/dist/index.css";
 import { Page } from "./page/page";
 import { overrideThemeVariables } from "ui-neumorphism";
+import { Route, Routes } from "react-router-dom";
+import Gridle from "./components/gridle/Gridle";
 
 function App() {
   overrideThemeVariables({
@@ -16,7 +18,14 @@ function App() {
     "--primary-light": "#c7befd",
   });
 
-  return <Page />;
+  return (
+    <Routes>
+      {" "}
+      {/* The Switch decides which component to show based on the current URL.*/}
+      <Route path="/" element={<Page />}></Route>
+      <Route path="gridle" element={<Gridle />}></Route>
+    </Routes>
+  );
 }
 
 export default App;
