@@ -45,7 +45,6 @@ const Grid = () => {
       </tbody>
     </table>
   );
-  //return <Letter letter="L" />;
 };
 
 export default Grid;
