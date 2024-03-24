@@ -1,6 +1,7 @@
 import Grid from "./Grid/Grid";
 import WordVisualiser from "./WordVisualiser/WordVisualiser";
 import classes from "./Gridle.module.scss";
+import InteractionButtons from "./interactionButtons/InteractionsButtons";
 
 const Gridle = () => {
   return (
@@ -10,6 +11,9 @@ const Gridle = () => {
       </div>
       <div className={classes["grid"]}>
         <Grid />
+      </div>
+      <div className={classes["buttons"]}>
+        <InteractionButtons />
       </div>
     </div>
   );
