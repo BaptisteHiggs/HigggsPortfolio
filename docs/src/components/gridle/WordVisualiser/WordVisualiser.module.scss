@@ -3,8 +3,30 @@
   text-align: center;
   font-size: x-large;
   border-bottom: 3px solid black;
+  height: 2em;
 }
 
 .container {
   margin-bottom: 30px;
+  height: 5em;
+}
+
+.submitted-words {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: 2em;
+  margin-top: 1em;
+}
+
+.word {
+  border: 1px solid gray;
+  color: gray;
+  padding: 3px;
+}
+
+.dash {
+  margin: 3px;
+  color: gray;
 }

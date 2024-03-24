@@ -4,10 +4,12 @@ import { Char } from "./Grid/types";
 
 type GridleStoreState = {
   currentWord: string;
+  foundWords: string[];
 };
 
 const initialState: GridleStoreState = {
   currentWord: "",
+  foundWords: [],
 };
 
 const executionStore = combine(initialState, (set, get) => ({
@@ -15,6 +17,9 @@ const executionStore = combine(initialState, (set, get) => ({
     setCurrentWord: (value: string) => set({ currentWord: value }),
     addLetterToCurrentWord: (value: Char) =>
       set({ currentWord: get().currentWord + value }),
+    addCurrentWord: () =>
+      set({ foundWords: [...get().foundWords, get().currentWord] }),
+    resetFoundWords: () => set({ foundWords: [] }),
   },
 }));
 
