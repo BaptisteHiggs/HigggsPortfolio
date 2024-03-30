@@ -1,4 +1,4 @@
-.letterButton {
+.letter-button {
   width: 80px;
   height: 80px;
   background-color: #ffb9c4;
@@ -13,9 +13,24 @@
   cursor: pointer;
 }
 
-.letterButton:hover {
+.letter-button:hover {
   background-color: #d36d6d;
   color: white;
+}
+
+.letter-button-disabled {
+  width: 80px;
+  height: 80px;
+  background-color: #969696;
+  color: black;
+  border-radius: 5px;
+  border-color: white;
+  font-family: "Roboto Slab", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-size: x-large;
+  cursor: pointer;
 }
 
 .td-cell {

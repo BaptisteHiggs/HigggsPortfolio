@@ -3,11 +3,14 @@ import Letter from "./Letter";
 import { Char, Position } from "./types";
 import { GenerateRandomChar } from "./utils";
 import classes from "./Grid.module.scss";
+import { useCallback, useState } from "react";
 
 const Grid = () => {
   const addLetterToCurrentWord = useGridleStore(
     (state) => state.actions.addLetterToCurrentWord
   );
+
+  const [lastPosition, setLastPosition] = useState<Position | undefined>();
 
   const rowCount = 4;
   const columnCount = 3;
@@ -22,8 +25,21 @@ const Grid = () => {
   }
 
   const handleClick = (letter: Char, position: Position) => {
-    addLetterToCurrentWord(letter);
+    if (!isDisabled(position)) {
+      addLetterToCurrentWord(letter);
+      setLastPosition(position);
+    }
   };
+
+  const isDisabled = useCallback(
+    (position: Position) => {
+      return (
+        lastPosition &&
+        (position.x === lastPosition.x || position.y === lastPosition.y)
+      );
+    },
+    [lastPosition]
+  );
 
   return (
     <table>
@@ -35,7 +51,8 @@ const Grid = () => {
                 <Letter
                   key={`lt-${x}-${y}`}
                   letter={char}
-                  position={{ x: x, y: y }}
+                  position={{ x, y }}
+                  disabled={isDisabled({ x, y })}
                   handleClick={handleClick}
                 />
               </td>
