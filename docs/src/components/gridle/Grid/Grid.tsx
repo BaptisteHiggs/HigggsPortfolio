@@ -1,7 +1,6 @@
-import { ChangeEvent, MouseEventHandler } from "react";
 import { useGridleStore } from "../gridleStore";
 import Letter from "./Letter";
-import { Char } from "./types";
+import { Char, Position } from "./types";
 import { GenerateRandomChar } from "./utils";
 import classes from "./Grid.module.scss";
 
@@ -22,20 +21,21 @@ const Grid = () => {
     grid.push(subList);
   }
 
-  const handleClick = (letter: Char) => {
+  const handleClick = (letter: Char, position: Position) => {
     addLetterToCurrentWord(letter);
   };
 
   return (
     <table>
       <tbody>
-        {grid.map((subList, i) => (
-          <tr key={`tr-${i}`}>
-            {subList.map((char, j) => (
-              <td key={`td-${i}-${j}`} className={classes["td-cell"]}>
+        {grid.map((subList, x) => (
+          <tr key={`tr-${x}`}>
+            {subList.map((char, y) => (
+              <td key={`td-${x}-${y}`} className={classes["td-cell"]}>
                 <Letter
-                  key={`lt-${i}-${j}`}
+                  key={`lt-${x}-${y}`}
                   letter={char}
+                  position={{ x: x, y: y }}
                   handleClick={handleClick}
                 />
               </td>

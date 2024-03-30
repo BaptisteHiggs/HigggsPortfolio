@@ -25,3 +25,5 @@ export type Char =
   | "X"
   | "Y"
   | "Z";
+
+export type Position = { x: number; y: number };
