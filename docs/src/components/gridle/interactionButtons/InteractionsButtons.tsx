@@ -1,8 +1,8 @@
+import { useEffect, useState } from "react";
 import { useGridleStore } from "../gridleStore";
 import classes from "./InteractionButtons.module.scss";
 
 const InteractionButtons = () => {
-  const foundWords = useGridleStore((state) => state.foundWords);
   const currentWord = useGridleStore((state) => state.currentWord);
   const setCurrentWord = useGridleStore(
     (state) => state.actions.setCurrentWord
@@ -13,6 +13,21 @@ const InteractionButtons = () => {
   const resetFoundWords = useGridleStore(
     (state) => state.actions.resetFoundWords
   );
+
+  const [wordToBeChecked, setWordToBeChecked] = useState("");
+  useEffect(() => {
+    async function checkWord(wordToBeChecked: string) {
+      const data = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${wordToBeChecked}`
+      );
+      if (data.status === 200 && currentWord === wordToBeChecked) {
+        addCurrentWord();
+      }
+    }
+    if (wordToBeChecked.length > 2) {
+      checkWord(wordToBeChecked);
+    }
+  }, [addCurrentWord, currentWord, wordToBeChecked]);
 
   function resetHandler() {
     setCurrentWord("");
@@ -25,7 +40,7 @@ const InteractionButtons = () => {
 
   function addHandler() {
     if (currentWord.length > 2) {
-      addCurrentWord();
+      setWordToBeChecked(currentWord);
       setCurrentWord("");
     }
   }

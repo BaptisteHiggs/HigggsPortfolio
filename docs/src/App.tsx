@@ -21,8 +21,8 @@ function App() {
   return (
     <Routes>
       {/* The Switch decides which component to show based on the current URL.*/}
-      <Route path="/" Component={Page}></Route>
-      <Route path="/gridle" Component={Gridle}></Route>
+      <Route path="/" element={<Page />}></Route>
+      <Route path="/gridle" element={<Gridle />}></Route>
     </Routes>
   );
 }
