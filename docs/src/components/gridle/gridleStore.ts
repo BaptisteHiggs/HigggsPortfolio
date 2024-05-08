@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { combine, devtools } from "zustand/middleware";
 import { Char, CharPosition, Position } from "./Grid/types";
-import { GenerateRandomCharSet } from "./Grid/utils";
-import { CharPosititionsToWord } from "./utils";
+import { CharPosititionsToWord, GenerateRandomCharSet } from "./utils";
 
 type GridleStoreState = {
   currentWord: CharPosition[];
