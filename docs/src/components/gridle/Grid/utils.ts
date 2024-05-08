@@ -32,3 +32,16 @@ const charList: Char[] = [
 export function GenerateRandomChar() {
   return charList[Math.floor(Math.random() * charList.length)];
 }
+
+export function GenerateRandomCharSet(rowCount: number, columnCount: number) {
+  const grid: Char[][] = [];
+  for (let y = 0; y < rowCount; y++) {
+    const subList: Char[] = [];
+    for (let x = 0; x < columnCount; x++) {
+      subList.push(GenerateRandomChar());
+    }
+    grid.push(subList);
+  }
+
+  return grid;
+}

@@ -7,11 +7,17 @@ const InteractionButtons = () => {
   const setCurrentWord = useGridleStore(
     (state) => state.actions.setCurrentWord
   );
+  const resetCurrentWord = useGridleStore(
+    (state) => state.actions.resetCurrentWord
+  );
   const addCurrentWord = useGridleStore(
     (state) => state.actions.addCurrentWord
   );
   const resetFoundWords = useGridleStore(
     (state) => state.actions.resetFoundWords
+  );
+  const setLastPosition = useGridleStore(
+    (state) => state.actions.setLastPosition
   );
 
   const [wordToBeChecked, setWordToBeChecked] = useState("");
@@ -22,16 +28,22 @@ const InteractionButtons = () => {
       );
       if (data.status === 200 && currentWord === wordToBeChecked) {
         addCurrentWord();
+        console.log("Is a word!");
+      } else {
+        console.log("Not a word!");
       }
+      resetCurrentWord();
     }
     if (wordToBeChecked.length > 2) {
       checkWord(wordToBeChecked);
     }
-  }, [addCurrentWord, currentWord, wordToBeChecked]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wordToBeChecked]);
 
   function resetHandler() {
     setCurrentWord("");
     resetFoundWords();
+    setLastPosition(undefined);
   }
 
   function deleteHandler() {
@@ -41,7 +53,6 @@ const InteractionButtons = () => {
   function addHandler() {
     if (currentWord.length > 2) {
       setWordToBeChecked(currentWord);
-      setCurrentWord("");
     }
   }
 
