@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useGridleStore } from "../gridleStore";
 import classes from "./InteractionButtons.module.scss";
+import { CharPosititionsToWord } from "../utils";
 
 const InteractionButtons = () => {
-  const currentWord = useGridleStore((state) => state.currentWord);
   const setCurrentWord = useGridleStore(
     (state) => state.actions.setCurrentWord
   );
+  const currentWord = useGridleStore((state) => state.currentWord);
   const resetCurrentWord = useGridleStore(
     (state) => state.actions.resetCurrentWord
   );
@@ -16,8 +17,8 @@ const InteractionButtons = () => {
   const resetFoundWords = useGridleStore(
     (state) => state.actions.resetFoundWords
   );
-  const setLastPosition = useGridleStore(
-    (state) => state.actions.setLastPosition
+  const deleteLastCharPosition = useGridleStore(
+    (state) => state.actions.deleteLastCharPosition
   );
 
   const [wordToBeChecked, setWordToBeChecked] = useState("");
@@ -26,7 +27,10 @@ const InteractionButtons = () => {
       const data = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${wordToBeChecked}`
       );
-      if (data.status === 200 && currentWord === wordToBeChecked) {
+      if (
+        data.status === 200 &&
+        CharPosititionsToWord(currentWord) === wordToBeChecked
+      ) {
         addCurrentWord();
         console.log("Is a word!");
       } else {
@@ -41,18 +45,17 @@ const InteractionButtons = () => {
   }, [wordToBeChecked]);
 
   function resetHandler() {
-    setCurrentWord("");
+    setCurrentWord([]);
     resetFoundWords();
-    setLastPosition(undefined);
   }
 
   function deleteHandler() {
-    setCurrentWord(currentWord.substring(0, currentWord.length - 1));
+    deleteLastCharPosition();
   }
 
   function addHandler() {
     if (currentWord.length > 2) {
-      setWordToBeChecked(currentWord);
+      setWordToBeChecked(CharPosititionsToWord(currentWord));
     }
   }
 

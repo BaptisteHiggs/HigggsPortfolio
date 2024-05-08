@@ -6,18 +6,16 @@ import { useCallback } from "react";
 
 const Grid = () => {
   const grid = useGridleStore((state) => state.charGrid);
-  const lastPosition = useGridleStore((state) => state.lastPosition);
-  const setLastPosition = useGridleStore(
-    (state) => state.actions.setLastPosition
-  );
+  const currentWord = useGridleStore((state) => state.currentWord);
+  const lastPosition =
+    currentWord.at(currentWord.length - 1)?.position ?? undefined;
   const addLetterToCurrentWord = useGridleStore(
     (state) => state.actions.addLetterToCurrentWord
   );
 
   const handleClick = (letter: Char, position: Position) => {
     if (!isDisabled(position)) {
-      addLetterToCurrentWord(letter);
-      setLastPosition(position);
+      addLetterToCurrentWord(letter, position);
     }
   };
 
