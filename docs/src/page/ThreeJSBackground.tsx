@@ -4,7 +4,11 @@ import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
 import { Font, FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 
+
+
 const ThreeJSBackground = () => {
+
+  const resumeDownloaded = useRef<boolean>(false);
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,9 +55,18 @@ const ThreeJSBackground = () => {
     const linkData = [
       { text: "LinkedIn", link: "https://linkedin.com/in/baptistehiggs/" },
       { text: "GitHub", link: "https://github.com/BaptisteHiggs" },
-      { text: "CAADRIA Conference Paper", link: "http://dx.doi.org/10.52842/conf.caadria.2020.2.697" },
-      { text: "Journal of Architectural Science Paper", link: "https://doi.org/10.1080/00038628.2020.1748869" },
-      { text: "Download Resume", link: "FUNCTION", function: downloadResume },
+      {
+        text: "CAADRIA Paper",
+        link: "http://dx.doi.org/10.52842/conf.caadria.2020.2.697",
+      },
+      {
+        text: "Journal of ArchSci Paper",
+        link: "https://doi.org/10.1080/00038628.2020.1748869",
+      },
+      {
+        text: "Download Resume",
+        function: downloadResume,
+      },
     ];
 
     /* ======================
@@ -72,10 +85,13 @@ const ThreeJSBackground = () => {
 
     const cubes: THREE.Mesh[] = [];
     const texts: THREE.Mesh[] = [];
+
     const textInfos: {
       mesh: THREE.Mesh;
       axis: "x";
       isHovered: boolean;
+      link?: string;
+      action?: () => void;
     }[] = [];
 
     /* ======================
@@ -107,7 +123,7 @@ const ThreeJSBackground = () => {
         const geometry = new TextGeometry(item.text, {
           font: loadedFont,
           size: textSize,
-          depth: depth,
+          depth,
           curveSegments: 8,
           bevelEnabled: true,
           bevelThickness: depth * 0.4,
@@ -149,7 +165,14 @@ const ThreeJSBackground = () => {
 
         scene.add(mesh);
         texts.push(mesh);
-        textInfos.push({ mesh, axis: "x", isHovered: false });
+
+        textInfos.push({
+          mesh,
+          axis: "x",
+          isHovered: false,
+          link: item.link,
+          action: item.function,
+        });
 
         row += 2;
       });
@@ -163,9 +186,10 @@ const ThreeJSBackground = () => {
         for (let y = 0; y < gridRows; y++) {
           if (grid[x][y]) continue;
 
-          const geometry = new THREE.BoxGeometry(size, size, size);
-          const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-          const cube = new THREE.Mesh(geometry, material);
+          const cube = new THREE.Mesh(
+            new THREE.BoxGeometry(size, size, size),
+            new THREE.MeshStandardMaterial({ color: 0xffffff })
+          );
 
           cube.position.set(
             (x - (gridCols - 1) / 2) * spacing,
@@ -210,44 +234,63 @@ const ThreeJSBackground = () => {
     });
 
     /* ======================
+       Click → follow link / action
+    ====================== */
+    const handleClick = () => {
+      raycaster.setFromCamera(mouseNDC, camera);
+      const hits = raycaster.intersectObjects(texts);
+
+      if (!hits.length) return;
+
+      const hitMesh = hits[0].object as THREE.Mesh;
+      const info = textInfos.find((t) => t.mesh === hitMesh);
+      if (!info) return;
+
+      if (info.link) {
+        window.open(info.link, "_blank");
+      } else if (info.action) {
+        if (info.action === downloadResume) {
+          if (!resumeDownloaded.current) {
+            info.action();
+            resumeDownloaded.current = true;
+          }          
+        } else {
+          info.action();
+        }
+      }
+    }
+
+    window.addEventListener("click", handleClick);
+
+    /* ======================
        Animation
     ====================== */
     const animate = () => {
-      /* Cubes: faster near mouse */
       cubes.forEach((cube) => {
         let speed = 0.003;
-
         if (mouse.onScreen) {
           const v = cube.position.clone().project(camera);
           const d = Math.hypot(v.x - mouse.x, v.y - mouse.y);
           speed += (1 - Math.min(d, 1)) * 0.05;
         }
-
         cube.rotation.x += speed;
         cube.rotation.y += speed * 0.8;
       });
 
-      /* Text rotation */
       textInfos.forEach(({ mesh, axis, isHovered }) => {
         if (!isHovered) {
           mesh.rotation[axis] += 0.003;
         } else {
-          // Smoothly face front
           mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, 0, 0.15);
         }
       });
 
-      /* Hover detection */
       raycaster.setFromCamera(mouseNDC, camera);
       const hits = raycaster.intersectObjects(texts);
 
       if (hits.length) {
         const hit = hits[0].object as THREE.Mesh;
-
-        textInfos.forEach((t) => (t.isHovered = false));
-
-        const info = textInfos.find((t) => t.mesh === hit);
-        if (info) info.isHovered = true;
+        textInfos.forEach((t) => (t.isHovered = t.mesh === hit));
 
         if (hoveredText !== hit) {
           if (hoveredText) {
@@ -258,21 +301,19 @@ const ThreeJSBackground = () => {
 
           hoveredText = hit;
           const m = hit.material as THREE.MeshPhysicalMaterial;
-          m.emissive.set(0x1144FF);
+          m.emissive.set(0x1144ff);
           m.emissiveIntensity = 1;
         }
 
         document.body.style.cursor = "pointer";
       } else {
         textInfos.forEach((t) => (t.isHovered = false));
-
         if (hoveredText) {
           const m = hoveredText.material as THREE.MeshPhysicalMaterial;
-          m.emissive.set(0xFFFFFF);
+          m.emissive.set(0xffffff);
           m.emissiveIntensity = 1.5;
           hoveredText = null;
         }
-
         document.body.style.cursor = "default";
       }
 
@@ -290,7 +331,7 @@ const ThreeJSBackground = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      labelRenderer.setSize(window.innerHeight, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
     };
 
     window.addEventListener("resize", onResize);
@@ -308,21 +349,19 @@ const ThreeJSBackground = () => {
       ref={mountRef}
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
+        inset: 0,
         zIndex: 0,
       }}
     />
   );
 };
 
+
 const downloadResume = () => {
   const pdfUrl = "/BaptisteHiggsResume.pdf";
   const link = document.createElement("a");
   link.href = pdfUrl;
-  link.download = "BaptisteHiggsResume.pdf"; // specify the filename
+  link.download = "BaptisteHiggsResume.pdf";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
