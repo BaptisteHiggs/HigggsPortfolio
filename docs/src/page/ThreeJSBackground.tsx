@@ -12,7 +12,7 @@ const ThreeJSBackground = () => {
     if (!mount) return;
 
     /* ======================
-       Scene setup
+       Scene
     ====================== */
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xa0a0a0);
@@ -24,7 +24,6 @@ const ThreeJSBackground = () => {
       1000
     );
     camera.position.set(0, 0, 2.5);
-    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -54,23 +53,33 @@ const ThreeJSBackground = () => {
       { text: "GitHub", link: "https://github.com/BaptisteHiggs" },
       { text: "CAADRIA Conference Paper", link: "http://dx.doi.org/10.52842/conf.caadria.2020.2.697" },
       { text: "Journal of Architectural Science Paper", link: "https://doi.org/10.1080/00038628.2020.1748869" },
+      { text: "Download Resume", link: "FUNCTION", function: downloadResume },
     ];
 
     /* ======================
-       Grid setup
+       Grid
     ====================== */
-    const cubes: THREE.Mesh[] = [];
-    const texts: THREE.Mesh[] = [];
-    const textInfos: { mesh: THREE.Mesh; axis: "x" | "y" }[] = [];
-
     const aspect = window.innerWidth / window.innerHeight;
     const gridCols = Math.round(16 * aspect);
     const gridRows = 16;
     const size = (1.5 / gridRows) * 2;
     const spacing = size * 1.05;
 
+    const grid: boolean[][] = Array.from(
+      { length: gridCols },
+      () => Array(gridRows).fill(false)
+    );
+
+    const cubes: THREE.Mesh[] = [];
+    const texts: THREE.Mesh[] = [];
+    const textInfos: {
+      mesh: THREE.Mesh;
+      axis: "x";
+      isHovered: boolean;
+    }[] = [];
+
     /* ======================
-       Font loading
+       Font
     ====================== */
     const fontLoader = new FontLoader();
     let loadedFont: Font;
@@ -80,14 +89,15 @@ const ThreeJSBackground = () => {
       (font) => {
         loadedFont = font;
         create3DText();
+        createCubes();
       }
     );
 
     /* ======================
-       Create 3D text
+       Create 3D Text
     ====================== */
     const create3DText = () => {
-      const col = 3;
+      const textCol = 3;
       let row = 3;
 
       linkData.forEach((item) => {
@@ -105,12 +115,24 @@ const ThreeJSBackground = () => {
           bevelSegments: 4,
         });
 
+        geometry.computeBoundingBox();
+        const bbox = geometry.boundingBox!;
+        const textWidth = bbox.max.x - bbox.min.x;
+        const cellsWide = Math.ceil(textWidth / spacing);
+
+        for (let i = 0; i < cellsWide; i++) {
+          const cx = textCol + i;
+          if (cx < gridCols && row < gridRows) {
+            grid[cx][row] = true;
+          }
+        }
+
         geometry.center();
 
         const material = new THREE.MeshPhysicalMaterial({
-          color: 0xeaeaea,
+          color: 0xffffff,
           emissive: 0xffffff,
-          emissiveIntensity: 1.5,
+          emissiveIntensity: 0.1,
           metalness: 0.15,
           roughness: 0.2,
           clearcoat: 1,
@@ -118,7 +140,8 @@ const ThreeJSBackground = () => {
 
         const mesh = new THREE.Mesh(geometry, material);
 
-        const px = (col - (gridCols - 1) / 2) * spacing;
+        const px =
+          (textCol + (cellsWide - 1) / 2 - (gridCols - 1) / 2) * spacing;
         const py = (row - (gridRows - 1) / 2) * spacing;
 
         mesh.position.set(px, py, 0);
@@ -126,7 +149,7 @@ const ThreeJSBackground = () => {
 
         scene.add(mesh);
         texts.push(mesh);
-        textInfos.push({ mesh, axis: "x" });
+        textInfos.push({ mesh, axis: "x", isHovered: false });
 
         row += 2;
       });
@@ -135,34 +158,37 @@ const ThreeJSBackground = () => {
     /* ======================
        Cubes
     ====================== */
-    for (let x = 0; x < gridCols; x++) {
-      for (let y = 0; y < gridRows; y++) {
-        const geometry = new THREE.BoxGeometry(size, size, size);
-        const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-        const cube = new THREE.Mesh(geometry, material);
+    const createCubes = () => {
+      for (let x = 0; x < gridCols; x++) {
+        for (let y = 0; y < gridRows; y++) {
+          if (grid[x][y]) continue;
 
-        cube.position.set(
-          (x - (gridCols - 1) / 2) * spacing,
-          (y - (gridRows - 1) / 2) * spacing,
-          0
-        );
+          const geometry = new THREE.BoxGeometry(size, size, size);
+          const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+          const cube = new THREE.Mesh(geometry, material);
 
-        cube.rotation.set(
-          Math.random() * Math.PI,
-          Math.random() * Math.PI,
-          Math.random() * Math.PI
-        );
+          cube.position.set(
+            (x - (gridCols - 1) / 2) * spacing,
+            (y - (gridRows - 1) / 2) * spacing,
+            0
+          );
 
-        scene.add(cube);
-        cubes.push(cube);
+          cube.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+          );
+
+          scene.add(cube);
+          cubes.push(cube);
+        }
       }
-    }
+    };
 
     /* ======================
        Lighting
     ====================== */
     scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-
     const dir = new THREE.DirectionalLight(0xffffff, 1.2);
     dir.position.set(5, 8, 10);
     scene.add(dir);
@@ -187,49 +213,66 @@ const ThreeJSBackground = () => {
        Animation
     ====================== */
     const animate = () => {
+      /* Cubes: faster near mouse */
       cubes.forEach((cube) => {
-        cube.rotation.x += 0.003;
-        cube.rotation.y += 0.002;
-      });
-
-      textInfos.forEach(({ mesh, axis }) => {
         let speed = 0.003;
+
         if (mouse.onScreen) {
-          const v = mesh.position.clone().project(camera);
+          const v = cube.position.clone().project(camera);
           const d = Math.hypot(v.x - mouse.x, v.y - mouse.y);
-          speed += (1 - Math.min(d, 1)) * 0.04;
+          speed += (1 - Math.min(d, 1)) * 0.05;
         }
-        mesh.rotation[axis] += speed;
+
+        cube.rotation.x += speed;
+        cube.rotation.y += speed * 0.8;
       });
 
-      /* Hover */
+      /* Text rotation */
+      textInfos.forEach(({ mesh, axis, isHovered }) => {
+        if (!isHovered) {
+          mesh.rotation[axis] += 0.003;
+        } else {
+          // Smoothly face front
+          mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, 0, 0.15);
+        }
+      });
+
+      /* Hover detection */
       raycaster.setFromCamera(mouseNDC, camera);
       const hits = raycaster.intersectObjects(texts);
 
       if (hits.length) {
         const hit = hits[0].object as THREE.Mesh;
 
+        textInfos.forEach((t) => (t.isHovered = false));
+
+        const info = textInfos.find((t) => t.mesh === hit);
+        if (info) info.isHovered = true;
+
         if (hoveredText !== hit) {
           if (hoveredText) {
             const m = hoveredText.material as THREE.MeshPhysicalMaterial;
             m.emissive.set(0xffffff);
-            m.emissiveIntensity = 1.5;
+            m.emissiveIntensity = 1;
           }
 
           hoveredText = hit;
           const m = hit.material as THREE.MeshPhysicalMaterial;
-          m.emissive.set(0x4fa3ff);
-          m.emissiveIntensity = 2.5;
+          m.emissive.set(0x1144FF);
+          m.emissiveIntensity = 1;
         }
 
         document.body.style.cursor = "pointer";
       } else {
+        textInfos.forEach((t) => (t.isHovered = false));
+
         if (hoveredText) {
           const m = hoveredText.material as THREE.MeshPhysicalMaterial;
-          m.emissive.set(0xffffff);
+          m.emissive.set(0xFFFFFF);
           m.emissiveIntensity = 1.5;
           hoveredText = null;
         }
+
         document.body.style.cursor = "default";
       }
 
@@ -247,7 +290,7 @@ const ThreeJSBackground = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerHeight, window.innerHeight);
     };
 
     window.addEventListener("resize", onResize);
@@ -273,6 +316,16 @@ const ThreeJSBackground = () => {
       }}
     />
   );
+};
+
+const downloadResume = () => {
+  const pdfUrl = "/BaptisteHiggsResume.pdf";
+  const link = document.createElement("a");
+  link.href = pdfUrl;
+  link.download = "BaptisteHiggsResume.pdf"; // specify the filename
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 export default ThreeJSBackground;
