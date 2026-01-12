@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import ThreeJSBackground from "./ThreeJSBackground";
-// import { Button } from "ui-neumorphism";
+import { Button } from "ui-neumorphism";
 import { TextLinkCombo } from "./types";
 
 
@@ -22,7 +22,7 @@ export const Page = () => {
 
   return (
     <div className="App">
-      {/*<div
+      <div
         style={{
           width: "100%",
           height: "100%",
@@ -41,7 +41,7 @@ export const Page = () => {
         >
           {links.map((link) => (
             <Fragment key={`${link.text}-fragment`}>
-              <p key={`${link.text}-comment`}>{/*@ts-ignore *\}</p>
+              <p key={`${link.text}-comment`}>{/*@ts-ignore */}</p>
               <Button
                 key={`${link.text}-button`}
                 color={"#333"}
@@ -53,15 +53,14 @@ export const Page = () => {
               <br key={`${link.text}-br2`} />
             </Fragment>
           ))}
-          {/*@ts-ignore *\}
+          {/*@ts-ignore */}
           <Button color={"#333"} onClick={() => downloadResume()}>
             Download CV
           </Button>
         </div>
-      </div>*/}
+      </div>
 
       <ThreeJSBackground />
-        <div>THIS TEXdT</div>
 
       <header className="App-header"></header>
     </div>
